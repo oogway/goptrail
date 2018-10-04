@@ -52,8 +52,14 @@ type LogDestination struct {
 }
 
 type User struct {
-	Email string `json:"email"`
-	ID    int    `json:"id"`
+	Email              string `json:"email"`
+	ID                 int    `json:"id"`
+	ReadOnly           int    `json:"read_only"`
+	ManageMembers      int    `json:"manage_members"`
+	ManageBilling      int    `json:"manage_billing"`
+	PurgeLogs          int    `json:"purge_logs"`
+	CanAccessAllGroups int    `json:"can_access_all_groups"`
+	GroupIDs           []int  `json:"group_ids"`
 }
 
 type InputSystem struct {

@@ -58,6 +58,26 @@ func (c *DefaultClient) ListUsers() ([]User, error) {
 	return users, err
 }
 
+func (c *DefaultClient) InviteUser(u User) error {
+	params := defaultParams()
+	var out interface{}
+	return c.execute("POST", "/users/invite.json", params, &out)
+}
+
+func (c *DefaultClient) UpdateUser(u User) error {
+	params := defaultParams()
+	var out interface{}
+	path := fmt.Sprintf("/users/%v.json", u.ID)
+	return c.execute("PUT", path, params, &out)
+}
+
+func (c *DefaultClient) DeleteUser(u User) error {
+	params := defaultParams()
+	var out interface{}
+	path := fmt.Sprintf("/users/%v.json", u.ID)
+	return c.execute("DELETE", path, params, &out)
+}
+
 func (c *DefaultClient) ListLogDestinations() ([]LogDestination, error) {
 	lds := []LogDestination{}
 	params := defaultParams()

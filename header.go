@@ -4,6 +4,10 @@ import "net"
 
 type Client interface {
 	ListUsers() ([]User, error)
+	InviteUser(User) error
+	UpdateUser(User) error
+	DeleteUser(User) error
+
 	ListLogDestinations() ([]LogDestination, error)
 	RegisterSystem(s InputSystem) (OutputSystem, error)
 	GetSystem(id string) (*OutputSystem, error)

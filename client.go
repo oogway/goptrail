@@ -4,14 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"time"
 
 	"strconv"
 
 	"github.com/pkg/errors"
-	"github.com/sethgrid/pester"
+	"github.com/hashicorp/go-retryablehttp"
 )
 
 type DefaultClient struct {
@@ -23,23 +22,31 @@ var pClient Client
 
 const defaultEndpoint = "https://papertrailapp.com/api/v1"
 
-const PesterRetries = 50
+func MakeRestClient() *http.Client {
+	client := retryablehttp.NewClient()
 
-func MakeRestClient() *pester.Client {
-	client := pester.New()
+	client.RetryMax = 50
+	client.RetryWaitMax = 60 * time.Second
+	client.ResponseLogHook = func(logger retryablehttp.Logger, res *http.Response) {
+		logger.Printf("%+v\n", res)
+	}
+	client.Backoff = papertrailBackoff
 
-	client.KeepLog = false
-	client.Concurrency = 1
-	client.MaxRetries = PesterRetries
-	client.Timeout = 5 * time.Second
+	return client.StandardClient()
+}
 
-	// Use a LinearJitter Backoff algorithm.
-	client.Backoff = pester.LinearJitterBackoff
-	client.LogHook = func(e pester.ErrEntry) {
-		log.Printf(client.FormatError(e))
+func papertrailBackoff(min, max time.Duration, attemptNum int, resp *http.Response) time.Duration {
+	if resp != nil {
+		if resp.StatusCode == http.StatusTooManyRequests {
+			if s, ok := resp.Header["X-Rate-Limit-Reset"]; ok {
+				if sleep, err := strconv.ParseInt(s[0], 10, 64); err == nil {
+					return time.Second * time.Duration(sleep)
+				}
+			}
+		}
 	}
 
-	return client
+	return retryablehttp.LinearJitterBackoff(min, max, attemptNum, resp)
 }
 
 func NewClient(token string) Client {

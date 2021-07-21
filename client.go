@@ -169,7 +169,7 @@ func (c *DefaultClient) ListGroups() ([]Group, error) {
 func (c *DefaultClient) UpdateGroup(g Group) error {
 	params := parseGroupParams(g)
 	var out interface{}
-	path := fmt.Sprintf("/groups/%s", g.ID)
+	path := fmt.Sprintf("/groups/%d", g.ID)
 
 	return c.execute("PUT", path, params, &out)
 }

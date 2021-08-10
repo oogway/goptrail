@@ -1,4 +1,4 @@
-module github.com/okkez/goptrail
+module github.com/reproio/goptrail
 
 go 1.15
 
